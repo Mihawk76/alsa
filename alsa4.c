@@ -80,12 +80,24 @@ int main() {
                                          &val, &dir);
   loops = 5000000 / val;
 
-  while (loops > 0) {
+  //while (loops > 0) {
+  while (1) {
     loops--;
     rc = snd_pcm_readi(handle, buffer, frames);
 		int i;
-		for(i = 0; i<=sizeof buffer;i++){
-			printf(" %d ",buffer[i]);
+		int nArray = (sizeof buffer)/sizeof(buffer[0]);
+		for(i = 0; i<=nArray;i++){
+				int d = 0;
+			if(buffer[i]>0){
+				//printf("%d#",buffer[i]);
+				int amp = (buffer[i])/3;
+    		//for(d=0;d<buffer[i];d++)
+    		for(d=0;d<amp;d++)
+    		{   
+      		printf("x");
+    		}   
+    		//printf("\n");
+			}
 		}
     if (rc == -EPIPE) {
       /* EPIPE means overrun */
