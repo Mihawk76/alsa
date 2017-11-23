@@ -86,18 +86,30 @@ int main() {
     rc = snd_pcm_readi(handle, buffer, frames);
 		int i;
 		int nArray = (sizeof buffer)/sizeof(buffer[0]);
+		int div = 1;
 		for(i = 0; i<=nArray;i++){
 				int d = 0;
 			if(buffer[i]>0){
 				//printf("%d#",buffer[i]);
-				int amp = (buffer[i])/3;
+				int amp = (buffer[i])/div;
     		//for(d=0;d<buffer[i];d++)
     		for(d=0;d<amp;d++)
     		{   
-      		printf("x");
+      		printf("X");
     		}   
-    		//printf("\n");
+    		printf("\n");
 			}
+			else if(buffer[i]<0){
+				//printf("%d#",buffer[i]);
+				int amp = (buffer[i])/div;
+    		//for(d=0;d<buffer[i];d++)
+    		for(d=0;d>amp;d--)
+    		{   
+      		printf("_");
+    		}   
+    		printf("\n");
+			}
+    	//printf("\n");
 		}
     if (rc == -EPIPE) {
       /* EPIPE means overrun */
@@ -114,7 +126,7 @@ int main() {
     //if (rc != size)
     //  fprintf(stderr,
     //          "short write: wrote %d bytes\n", rc);
-	printf("\n");
+	//printf("\n");
   }
 
   snd_pcm_drain(handle);
