@@ -97,7 +97,7 @@ int main() {
     		{   
       		printf("X");
     		}   
-    		printf("\n");
+    		printf("|%d\n",buffer[i]);
 			}
 			else if(buffer[i]<0){
 				//printf("%d#",buffer[i]);
@@ -107,7 +107,7 @@ int main() {
     		{   
       		printf("_");
     		}   
-    		printf("\n");
+    		printf("|-%d\n",buffer[i]);
 			}
     	//printf("\n");
 		}
