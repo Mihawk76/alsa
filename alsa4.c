@@ -9,6 +9,7 @@ and writes to standard output for 5 seconds of data.
 #define ALSA_PCM_NEW_HW_PARAMS_API
 
 #include <alsa/asoundlib.h>
+#include <time.h>
 
 int main() {
   long loops;
@@ -20,6 +21,13 @@ int main() {
   int dir;
   snd_pcm_uframes_t frames;
   char *buffer;
+	int voice_detected = 0;
+	int sound_duration = 0;
+	int second_happen = 0;
+	int second_log[1000];
+	int second_loop = 0;
+  time_t now;
+  struct tm *tm;
 
   /* Open PCM device for recording (capture). */
   rc = snd_pcm_open(&handle, "default",
@@ -83,6 +91,11 @@ int main() {
   //while (loops > 0) {
   while (1) {
     loops--;
+		now = time(0);
+		if ((tm = localtime (&now)) == NULL) {
+        printf ("Error extracting time stuff\n");
+        return 1;
+    }
     rc = snd_pcm_readi(handle, buffer, frames);
 		int i;
 		int nArray = (sizeof buffer)/sizeof(buffer[0]);
@@ -97,6 +110,19 @@ int main() {
     		{   
       		printf("X");
     		}   
+				if((buffer[i]*buffer[i])>100)
+				{
+					voice_detected = 1;	
+					second_log[second_loop] = tm->tm_sec;
+					second_loop++;
+					//if(second_happen == 0){
+					//	second_happen = tm->tm_sec;
+					//}
+				}
+				else if((buffer[i]*buffer[i])<100)
+				{
+					voice_detected = 0;
+				}
     		printf("|%d\n",buffer[i]);
 			}
 			else if(buffer[i]<0){
@@ -110,6 +136,21 @@ int main() {
     		printf("|-%d\n",buffer[i]);
 			}
     	//printf("\n");
+			for(d=0;d<(second_loop-1);d++)
+			{
+				sound_duration = (second_log[second_loop] - second_log[second_loop-1]) + sound_duration;
+			}
+			second_loop = 0;
+			//if(voice_detected==1 && second_happen < tm->tm_sec)
+			//{
+			//	sound_duration++;
+				//second_happen = tm->tm_sec;
+			//}
+			//else if(voice_detected==0)
+			//{
+			//	sound_duration=0;
+			//}
+			printf("Duration %d\n",sound_duration);
 		}
     if (rc == -EPIPE) {
       /* EPIPE means overrun */
