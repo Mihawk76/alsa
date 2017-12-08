@@ -25,8 +25,8 @@ int main() {
 	int voice_detected = 0;
 	int sound_duration = 0;
 	int second_happen = 0;
-	int second_log[1000];
-	int value_log[1000];
+	int second_log[100000];
+	int value_log[100000];
 	int second_loop = 0;
   time_t now;
   struct tm *tm;
@@ -102,8 +102,8 @@ int main() {
 		int i;
 		int nArray = (sizeof buffer)/sizeof(buffer[0]);
 		int div = 1;
+		int d = 0;
 		for(i = 0; i<=nArray;i++){
-				int d = 0;
 			if(buffer[i]>0){
 				//printf("%d#",buffer[i]);
 				int amp = (buffer[i])/div;
@@ -112,22 +112,25 @@ int main() {
     		{   
       		printf("X");
     		}   
-				if(buffer[i] > 100 && buffer[i] < 200)
+    		printf("|%d\n",buffer[i]);
+				if(buffer[i] > 0 && buffer[i] < 200)
 				{
 					voice_detected = 1;	
-					second_log[second_loop] = (tm->tm_min*60 + tm->tm_sec);
-					value_log[second_loop] = buffer[i];
-					printf("\nsecond %d\n",second_log[second_loop]);
-					second_loop++;
-					//if(second_happen == 0){
-					//	second_happen = tm->tm_sec;
-					//}
+					if(/*second_loop == 0 || (second_loop > 0 && second_log[second_loop-1] < (tm->tm_min*60 + tm->tm_sec))*/1)
+					{
+						second_log[second_loop] = (tm->tm_min*60 + tm->tm_sec);
+						value_log[second_loop] = buffer[i];
+						printf("\nsecond %d snd_loop %d\n",second_log[second_loop],second_loop);
+						second_loop++;
+						//if(second_happen == 0){
+						//	second_happen = tm->tm_sec;
+						//}
+					}
 				}
 				else if((buffer[i]*buffer[i])<100)
 				{
 					voice_detected = 0;
 				}
-    		printf("|%d\n",buffer[i]);
 			}
 			else if(buffer[i]<0){
 				//printf("%d#",buffer[i]);
@@ -141,32 +144,12 @@ int main() {
 			}
     	//printf("\n");
 			printf("loop %d\n",second_loop);
-			for(d=1;d<(second_loop-1);d++)
-			{
-				if(value_log[second_loop] > 100 && value_log[second_loop-1] > 100
- 					&& value_log[second_loop] < 1000 && value_log[second_loop-1] < 1000){
-					sound_duration = (second_log[second_loop] - second_log[second_loop-1]) + sound_duration;
-					printf("Duration %d\n",sound_duration);
-					printf("0 %d 1 %d\n",second_log[second_loop-1],second_log[second_loop]);
-					printf("value 0 %d 1 %d\n",value_log[second_loop-1],value_log[second_loop]);
-				}
-			}
-			//if(second_log[second_loop] < (tm->tm_sec-1) || second_log[second_loop] > (tm->tm_sec+1)){
-			if(second_loop >= 1000){
-				second_loop = 0;
-			}
-			//if(voice_detected==1 && second_happen < tm->tm_sec)
-			//{
-			//	sound_duration++;
-				//second_happen = tm->tm_sec;
-			//}
-			//else if(voice_detected==0)
-			//{
-			//	sound_duration=0;
+			//if(second_loop >= 1000){
+			//	second_loop = 0;
 			//}
 			printf("Duration %d\n",sound_duration);
 		}
-    if (rc == -EPIPE) {
+		if (rc == -EPIPE) {
       /* EPIPE means overrun */
       //fprintf(stderr, "overrun occurred\n");
       snd_pcm_prepare(handle);
@@ -182,7 +165,37 @@ int main() {
     //  fprintf(stderr,
     //          "short write: wrote %d bytes\n", rc);
 	//printf("\n");
-			if(sound_duration!=0){
+			int time_avg = 0;
+			if(second_loop > 5000){
+			for(d=1;d<(second_loop-1);d++)
+				{
+						if(second_log[d-1] < second_log[d]){
+						float avg = 0.0, sum = 0.0, value = 0.0;
+						int n_avg = 0;
+						for(n_avg = 0;n_avg<(d-1);n_avg++)
+						{
+							value = value_log[n_avg];
+							sum += value;
+						}
+						avg = sum / n_avg;
+						if( avg > 70){
+							if(time_avg == 0 || time_avg > 0 && time_avg < second_log[d]){
+								sound_duration++;
+								time_avg = second_log[d];
+								printf("sd %d\n", sound_duration); 
+							}
+						}
+					//if(value_log[d] > 100 && value_log[d-1] > 100
+ 				//	&& value_log[d] < 1000 && value_log[d-1] < 1000){
+						//sound_duration = (second_log[d] - second_log[d-1]) + sound_duration;
+						//printf("loop %d Duration %d\n", d, sound_duration);
+						//printf("second 0 %d 1 %d\n",second_log[d-1],second_log[d]);
+						//printf("value 0 %d 1 %d\n",value_log[d-1],value_log[d]);
+						printf("loop %d second %d, value %d duration %d avg %f\n", d, second_log[d], value_log[d], sound_duration, avg);
+					}
+				}
+			}
+			if(second_loop > 10000){
 				break;
 			}
   }
