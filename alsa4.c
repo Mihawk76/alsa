@@ -10,6 +10,7 @@ and writes to standard output for 5 seconds of data.
 
 #include <alsa/asoundlib.h>
 #include <time.h>
+#include <math.h>
 
 int main() {
   long loops;
@@ -25,6 +26,7 @@ int main() {
 	int sound_duration = 0;
 	int second_happen = 0;
 	int second_log[1000];
+	int value_log[1000];
 	int second_loop = 0;
   time_t now;
   struct tm *tm;
@@ -110,10 +112,12 @@ int main() {
     		{   
       		printf("X");
     		}   
-				if((buffer[i]*buffer[i])>100)
+				if(buffer[i] > 100 && buffer[i] < 200)
 				{
 					voice_detected = 1;	
-					second_log[second_loop] = tm->tm_sec;
+					second_log[second_loop] = (tm->tm_min*60 + tm->tm_sec);
+					value_log[second_loop] = buffer[i];
+					printf("\nsecond %d\n",second_log[second_loop]);
 					second_loop++;
 					//if(second_happen == 0){
 					//	second_happen = tm->tm_sec;
@@ -136,11 +140,21 @@ int main() {
     		printf("|-%d\n",buffer[i]);
 			}
     	//printf("\n");
-			for(d=0;d<(second_loop-1);d++)
+			printf("loop %d\n",second_loop);
+			for(d=1;d<(second_loop-1);d++)
 			{
-				sound_duration = (second_log[second_loop] - second_log[second_loop-1]) + sound_duration;
+				if(value_log[second_loop] > 100 && value_log[second_loop-1] > 100
+ 					&& value_log[second_loop] < 1000 && value_log[second_loop-1] < 1000){
+					sound_duration = (second_log[second_loop] - second_log[second_loop-1]) + sound_duration;
+					printf("Duration %d\n",sound_duration);
+					printf("0 %d 1 %d\n",second_log[second_loop-1],second_log[second_loop]);
+					printf("value 0 %d 1 %d\n",value_log[second_loop-1],value_log[second_loop]);
+				}
 			}
-			second_loop = 0;
+			//if(second_log[second_loop] < (tm->tm_sec-1) || second_log[second_loop] > (tm->tm_sec+1)){
+			if(second_loop >= 1000){
+				second_loop = 0;
+			}
 			//if(voice_detected==1 && second_happen < tm->tm_sec)
 			//{
 			//	sound_duration++;
@@ -168,6 +182,9 @@ int main() {
     //  fprintf(stderr,
     //          "short write: wrote %d bytes\n", rc);
 	//printf("\n");
+			if(sound_duration!=0){
+				break;
+			}
   }
 
   snd_pcm_drain(handle);
