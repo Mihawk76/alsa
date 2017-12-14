@@ -92,6 +92,7 @@ int main() {
 
   //while (loops > 0) {
   while (1) {
+		sound_duration = 0;
     loops--;
 		now = time(0);
 		if ((tm = localtime (&now)) == NULL) {
@@ -166,7 +167,7 @@ int main() {
     //          "short write: wrote %d bytes\n", rc);
 	//printf("\n");
 			int time_avg = 0;
-			if(second_loop > 5000){
+			if(second_loop > 9000){
 			for(d=1;d<(second_loop-1);d++)
 				{
 						if(second_log[d-1] < second_log[d]){
