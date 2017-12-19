@@ -24,6 +24,7 @@ int main() {
   char *buffer;
 	int voice_detected = 0;
 	int sound_duration = 0;
+	int total_duration = 0;
 	int second_happen = 0;
 	int second_log[100000];
 	int value_log[100000];
@@ -111,9 +112,9 @@ int main() {
     		//for(d=0;d<buffer[i];d++)
     		for(d=0;d<amp;d++)
     		{   
-      		printf("X");
+      		//printf("X");
     		}   
-    		printf("|%d\n",buffer[i]);
+    		//printf("|%d\n",buffer[i]);
 				if(buffer[i] > 0 && buffer[i] < 200)
 				{
 					voice_detected = 1;	
@@ -121,7 +122,7 @@ int main() {
 					{
 						second_log[second_loop] = (tm->tm_min*60 + tm->tm_sec);
 						value_log[second_loop] = buffer[i];
-						printf("\nsecond %d snd_loop %d\n",second_log[second_loop],second_loop);
+						//printf("\nsecond %d snd_loop %d\n",second_log[second_loop],second_loop);
 						second_loop++;
 						//if(second_happen == 0){
 						//	second_happen = tm->tm_sec;
@@ -139,16 +140,16 @@ int main() {
     		//for(d=0;d<buffer[i];d++)
     		for(d=0;d>amp;d--)
     		{   
-      		printf("_");
+      		//printf("_");
     		}   
-    		printf("|-%d\n",buffer[i]);
+    		//printf("|-%d\n",buffer[i]);
 			}
     	//printf("\n");
-			printf("loop %d\n",second_loop);
+			//printf("loop %d\n",second_loop);
 			//if(second_loop >= 1000){
 			//	second_loop = 0;
 			//}
-			printf("Duration %d\n",sound_duration);
+			//printf("Duration %d\n",sound_duration);
 		}
 		if (rc == -EPIPE) {
       /* EPIPE means overrun */
@@ -183,7 +184,7 @@ int main() {
 							if(time_avg == 0 || time_avg > 0 && time_avg < second_log[d]){
 								sound_duration++;
 								time_avg = second_log[d];
-								printf("sd %d\n", sound_duration); 
+								//printf("sd %d\n", sound_duration); 
 							}
 						}
 					//if(value_log[d] > 100 && value_log[d-1] > 100
@@ -192,12 +193,18 @@ int main() {
 						//printf("loop %d Duration %d\n", d, sound_duration);
 						//printf("second 0 %d 1 %d\n",second_log[d-1],second_log[d]);
 						//printf("value 0 %d 1 %d\n",value_log[d-1],value_log[d]);
-						printf("loop %d second %d, value %d duration %d avg %f\n", d, second_log[d], value_log[d], sound_duration, avg);
+						//printf("loop %d second %d, value %d duration %d avg %f\n", d, second_log[d], value_log[d], sound_duration, avg);
 					}
 				}
 			}
 			if(second_loop > 10000){
-				break;
+				if(sound_duration > 1){
+					total_duration += sound_duration;
+				}
+				second_loop = 0;
+				printf("time %d\n", total_duration);
+				//break;
+				//put data here to send to server
 			}
   }
 
